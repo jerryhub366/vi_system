@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>价值投资学习路径（可点击版）</title>
+  <style>
+    :root { --bg:#0b0d12; --card:#121723; --muted:#9aa4b2; --text:#e9eef5; --accent:#7aa2ff; --ok:#57d38c; --warn:#ffcc66; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+      background: radial-gradient(1200px 600px at 10% 10%, #1a2140 0%, transparent 60%),
+                  radial-gradient(1200px 600px at 90% 20%, #2a1636 0%, transparent 60%),
+                  var(--bg);
+      color: var(--text);
+    }
+    header { padding: 24px 18px 8px; max-width: 1100px; margin: 0 auto; }
+    h1 { margin:0 0 10px; font-size: 20px; letter-spacing: .2px; }
+    .sub { color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .bar { display:flex; gap:10px; margin: 14px 0 6px; flex-wrap: wrap; }
+    input[type="search"]{
+      flex:1; min-width: 220px;
+      padding: 10px 12px; border-radius: 12px; border: 1px solid #24304a;
+      background: rgba(18,23,35,.85); color: var(--text); outline:none;
+    }
+    button{
+      padding: 10px 12px; border-radius: 12px; border: 1px solid #24304a;
+      background: rgba(18,23,35,.85); color: var(--text); cursor:pointer;
+    }
+    button:hover{ border-color:#3b4c74; }
+    .pill { display:inline-flex; align-items:center; gap:8px; padding: 6px 10px; border-radius: 999px;
+      border: 1px solid #24304a; background: rgba(18,23,35,.6); color: var(--muted); font-size: 12px;
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 10px 18px 40px; display:grid; grid-template-columns: 320px 1fr; gap: 14px; }
+    @media (max-width: 900px){ .wrap{ grid-template-columns: 1fr; } }
+    .panel { background: rgba(18,23,35,.7); border: 1px solid #24304a; border-radius: 16px; overflow:hidden; }
+    .panel h2 { margin:0; padding: 14px 14px 10px; font-size: 14px; color: #cfe0ff; border-bottom: 1px solid #24304a; }
+    .list { padding: 10px; display:flex; flex-direction: column; gap: 10px; }
+    .item { padding: 12px; border-radius: 14px; border: 1px solid #24304a; background: rgba(11,13,18,.4); cursor:pointer; }
+    .item:hover{ border-color:#3b4c74; }
+    .item.active{ border-color: var(--accent); box-shadow: 0 0 0 1px rgba(122,162,255,.25) inset; }
+    .item .t { font-weight: 600; font-size: 13px; margin-bottom: 6px; display:flex; align-items:center; justify-content: space-between; gap: 10px; }
+    .item .d { color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid #2a3551; color: var(--muted); }
+    .badge.ok{ border-color: rgba(87,211,140,.35); color: rgba(87,211,140,.9); }
+    .content { padding: 14px; }
+    .hero { display:flex; gap: 12px; align-items:flex-start; justify-content: space-between; flex-wrap: wrap; }
+    .hero h3{ margin:0 0 6px; font-size: 16px; }
+    .meta { color: var(--muted); font-size: 12px; }
+    .grid { margin-top: 12px; display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    @media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
+    .card { padding: 12px; border-radius: 14px; border: 1px solid #24304a; background: rgba(11,13,18,.35); }
+    .card .ct { font-weight: 600; font-size: 13px; margin-bottom: 8px; }
+    .card ul { margin:0; padding-left: 18px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .row { display:flex; gap:10px; flex-wrap: wrap; margin-top: 12px; }
+    .row button{ background: rgba(18,23,35,.55); }
+    .note { margin-top: 12px; padding: 10px 12px; border-radius: 14px; border: 1px dashed #2a3551; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .check { display:flex; align-items:center; gap:10px; margin-top: 12px; }
+    .check input{ width: 18px; height: 18px; }
+    .kpi { display:flex; gap:10px; flex-wrap: wrap; margin-top: 10px; }
+    .kpi .pill strong{ color: var(--text); font-weight: 600; }
+    .footer { max-width: 1100px; margin: 0 auto; padding: 0 18px 26px; color: var(--muted); font-size: 12px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>价值投资学习路径（可点击版）</h1>
+    <div class="sub">像“图文卡片”一样点着学：左侧选模块，右侧给你该学什么、怎么练、输出什么。支持搜索、完成勾选和本地保存。</div>
+    <div class="bar">
+      <input id="q" type="search" placeholder="搜索模块/关键词：护城河 / 现金流 / ROIC / 估值 / 风险..." />
+      <button id="reset">重置进度</button>
+      <span class="pill">进度：<strong id="prog">0%</strong></span>
+      <span class="pill">已完成：<strong id="done">0</strong>/<strong id="total">0</strong></span>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <section class="panel">
+      <h2>学习模块</h2>
+      <div class="list" id="list"></div>
+    </section>
+
+    <section class="panel">
+      <h2>模块详情</h2>
+      <div class="content" id="content"></div>
+    </section>
+  </div>
+
+  <div class="footer">
+    提示：这是“离线可交互教程”示例。你想把它升级成“你的投研引擎入口”（比如链接到你的模板、笔记、财报模型）也很容易：把每个模块的“输出物”改成你自己的文档/网页链接即可。
+  </div>
+
+<script>
+  const modules = [
+    {
+      id:"mindset",
+      title:"1) 框架与心法",
+      level:"入门",
+      keywords:["长期","概率","反脆弱","清单"],
+      why:"先把决策系统搭起来，避免“看了很多但不落地”。",
+      learn:[
+        "用一句话定义你的“能力圈”与“禁区”",
+        "建立投资清单：买入前/持有中/卖出后",
+        "用赔率（上行/下行）而不是预测来做决策"
+      ],
+      practice:[
+        "写一页《我的投资操作系统》：目标、约束、流程、复盘频率",
+        "从历史错误里提炼 3 条“红线规则”"
+      ],
+      output:[
+        "一页纸：投资操作系统",
+        "Checklist：买入/持有/卖出"
+      ],
+      kpi:[["可复用流程", "有"],["是否可执行", "每周"],["错误复盘", ">=3条"]]
+    },
+    {
+      id:"biz",
+      title:"2) 生意理解与护城河",
+      level:"核心",
+      keywords:["护城河","商业模式","定价权","网络效应"],
+      why:"价值投资最值钱的是“看懂生意”，不是背指标。",
+      learn:[
+        "收入来源：谁付钱？为什么持续付钱？",
+        "成本结构：固定/可变，规模效应在哪",
+        "护城河类型：品牌/网络效应/切换成本/规模/监管/成本优势"
+      ],
+      practice:[
+        "选 1 家公司写《3 段式生意解释》：客户-价值-持续性",
+        "列出 3 个最可能破坏护城河的变量"
+      ],
+      output:[
+        "一页：商业模式拆解图（文字版即可）",
+        "风险清单：护城河破坏因子"
+      ],
+      kpi:[["客户付费理由", "清晰"],["护城河可证据化", ">=2证据"],["破坏因子", ">=3"]]
+    },
+    {
+      id:"fs",
+      title:"3) 财报与现金流质量",
+      level:"核心",
+      keywords:["财报","现金流","应收","存货","资本开支"],
+      why:"财报是生意的“证据”。重点是现金流质量与持续性。",
+      learn:[
+        "利润 vs 现金：经营现金流与利润差异来自哪里",
+        "营运资本：应收/存货/应付变化意味着什么",
+        "资本开支：维持性 vs 扩张性，折旧是否可信"
+      ],
+      practice:[
+        "拿一家公司做“利润-现金流桥”",
+        "用 3 年数据判断：现金流转换率是否稳定"
+      ],
+      output:[
+        "表：利润→经营现金流桥（3年）",
+        "结论：现金流质量评分（A/B/C）"
+      ],
+      kpi:[["现金流转换率", "稳定"],["异常解释", "可追溯"],["维持性CapEx", "有估算"]]
+    },
+    {
+      id:"unit",
+      title:"4) 单位经济与ROIC",
+      level:"进阶",
+      keywords:["ROIC","单位经济","LTV","CAC","边际"],
+      why:"用“单位”看生意，避免被总量迷惑；ROIC 是资本效率的核心。",
+      learn:[
+        "单位经济：每个订单/用户/门店到底赚不赚",
+        "ROIC 拆解：利润率 × 周转率（直觉化理解）",
+        "增长质量：增长是否需要更多资本“喂”"
+      ],
+      practice:[
+        "用公开数据粗算 ROIC（或近似：NOPAT / (Net Working Capital + Net PPE))",
+        "写一句话解释：为什么这家公司资本效率高/低"
+      ],
+      output:[
+        "一页：ROIC 拆解与驱动因素",
+        "单位经济假设表（哪怕是粗估）"
+      ],
+      kpi:[["ROIC方向", "解释清楚"],["驱动因素", ">=2"],["增长需资本", "可量化"]]
+    },
+    {
+      id:"value",
+      title:"5) 估值与安全边际",
+      level:"进阶",
+      keywords:["估值","安全边际","情景","赔率"],
+      why:"估值不是算一个数，而是做“情景 + 赔率”的决策。",
+      learn:[
+        "三档情景：悲观/基准/乐观（用范围，不用点估）",
+        "安全边际来自：低价 + 低风险 + 高确定性",
+        "别被模型绑架：关键是输入假设"
+      ],
+      practice:[
+        "为 1 家公司做三档情景估值（简单倍数法也行）",
+        "写出“我愿意买入的价格区间”与理由"
+      ],
+      output:[
+        "估值卡片：三情景 + 买入区间",
+        "假设清单：最敏感的 3 个变量"
+      ],
+      kpi:[["情景完整", "三档"],["敏感变量", ">=3"],["买入区间", "明确"]]
+    },
+    {
+      id:"risk",
+      title:"6) 风险、组合与纪律",
+      level:"核心",
+      keywords:["风险","仓位","回撤","纪律","再平衡"],
+      why:"最后拼的是“活得久”。把风险前置，才有复利。",
+      learn:[
+        "风险分类：永久性损失 vs 波动",
+        "仓位规则：单票上限、行业上限、流动性约束",
+        "复盘体系：决策质量 > 短期盈亏"
+      ],
+      practice:[
+        "写你的仓位规则（比如单票不超过X%）",
+        "设计每月复盘模板：决策、假设、证据变化"
+      ],
+      output:[
+        "组合规则一页纸",
+        "月度复盘模板"
+      ],
+      kpi:[["规则明确", "可执行"],["复盘频率", "每月"],["证据更新", "有记录"]]
+    }
+  ];
+
+  const $ = (id)=>document.getElementById(id);
+  const LS_KEY = "vi_path_progress_v1";
+
+  let state = {
+    active: modules[0].id,
+    done: new Set()
+  };
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(LS_KEY);
+      if(!raw) return;
+      const obj = JSON.parse(raw);
+      if(obj && Array.isArray(obj.done)) state.done = new Set(obj.done);
+      if(obj && typeof obj.active === "string") state.active = obj.active;
+    }catch(e){}
+  }
+  function save(){
+    localStorage.setItem(LS_KEY, JSON.stringify({ active: state.active, done: [...state.done] }));
+  }
+
+  function pct(){
+    const total = modules.length;
+    const done = state.done.size;
+    return total ? Math.round(done*100/total) : 0;
+  }
+
+  function updateHeader(){
+    $("total").textContent = modules.length;
+    $("done").textContent = state.done.size;
+    $("prog").textContent = pct() + "%";
+  }
+
+  function renderList(filter=""){
+    const list = $("list");
+    list.innerHTML = "";
+    const f = filter.trim().toLowerCase();
+
+    const filtered = modules.filter(m=>{
+      if(!f) return true;
+      const hay = [m.title, m.level, m.why, ...m.keywords].join(" ").toLowerCase();
+      return hay.includes(f);
+    });
+
+    filtered.forEach(m=>{
+      const div = document.createElement("div");
+      div.className = "item" + (m.id===state.active ? " active" : "");
+      const done = state.done.has(m.id);
+      div.innerHTML = `
+        <div class="t">
+          <span>${m.title}</span>
+          <span class="badge ${done ? "ok":""}">${done ? "已完成":"未完成"}</span>
+        </div>
+        <div class="d">${m.why}</div>
+      `;
+      div.onclick = ()=>{
+        state.active = m.id;
+        save();
+        renderList($("q").value);
+        renderContent();
+      };
+      list.appendChild(div);
+    });
+
+    if(filtered.length===0){
+      const empty = document.createElement("div");
+      empty.className = "item";
+      empty.innerHTML = `<div class="t"><span>没有匹配</span><span class="badge">提示</span></div>
+                         <div class="d">换个关键词试试：护城河 / 现金流 / 估值 / 风险 …</div>`;
+      list.appendChild(empty);
+    }
+  }
+
+  function renderContent(){
+    const m = modules.find(x=>x.id===state.active) || modules[0];
+    const isDone = state.done.has(m.id);
+
+    const kpis = (m.kpi||[]).map(([k,v])=>`<span class="pill"><strong>${k}</strong>：${v}</span>`).join("");
+
+    $("content").innerHTML = `
+      <div class="hero">
+        <div>
+          <h3>${m.title}</h3>
+          <div class="meta">难度：${m.level} · 关键词：${m.keywords.map(x=>`<span class="badge">${x}</span>`).join(" ")}</div>
+        </div>
+        <div class="kpi">${kpis}</div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="ct">你要学什么</div>
+          <ul>${m.learn.map(x=>`<li>${x}</li>`).join("")}</ul>
+        </div>
+        <div class="card">
+          <div class="ct">怎么练（练习题）</div>
+          <ul>${m.practice.map(x=>`<li>${x}</li>`).join("")}</ul>
+        </div>
+        <div class="card">
+          <div class="ct">输出物（可复用）</div>
+          <ul>${m.output.map(x=>`<li>${x}</li>`).join("")}</ul>
+        </div>
+      </div>
+
+      <div class="check">
+        <input id="chk" type="checkbox" ${isDone ? "checked":""} />
+        <label for="chk">我已完成该模块（本地保存）</label>
+      </div>
+
+      <div class="row">
+        <button id="next">下一模块</button>
+        <button id="prev">上一模块</button>
+        <button id="copy">复制“输出物清单”</button>
+      </div>
+
+      <div class="note">
+        快速玩法：先把每个模块的“输出物”都做出来（哪怕很粗），你就拥有一个可迭代的投研系统。之后再逐个加证据、加数据、加案例。
+      </div>
+    `;
+
+    $("chk").onchange = (e)=>{
+      if(e.target.checked) state.done.add(m.id);
+      else state.done.delete(m.id);
+      save();
+      updateHeader();
+      renderList($("q").value);
+    };
+
+    const idx = modules.findIndex(x=>x.id===m.id);
+    $("next").onclick = ()=>{
+      const ni = Math.min(modules.length-1, idx+1);
+      state.active = modules[ni].id;
+      save();
+      renderList($("q").value);
+      renderContent();
+    };
+    $("prev").onclick = ()=>{
+      const pi = Math.max(0, idx-1);
+      state.active = modules[pi].id;
+      save();
+      renderList($("q").value);
+      renderContent();
+    };
+    $("copy").onclick = async ()=>{
+      const text = `【${m.title} 输出物】\n- ` + m.output.join("\n- ");
+      try{
+        await navigator.clipboard.writeText(text);
+        alert("已复制到剪贴板");
+      }catch(e){
+        prompt("复制失败，手动复制：", text);
+      }
+    };
+
+    updateHeader();
+  }
+
+  $("q").addEventListener("input", (e)=>renderList(e.target.value));
+  $("reset").onclick = ()=>{
+    if(confirm("确定要清空进度吗？（只清本地）")){
+      state.done = new Set();
+      save();
+      updateHeader();
+      renderList($("q").value);
+      renderContent();
+    }
+  };
+
+  load();
+  renderList("");
+  renderContent();
+</script>
+</body>
+</html>
+
