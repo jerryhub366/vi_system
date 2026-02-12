@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-A single-file interactive tutorial for value investing (价值投资学习路径). The entire app lives in `value.html` — no build tools, no dependencies, no server required. Open the file directly in a browser.
+A single-file interactive tutorial for value investing (价值投资学习路径). The entire app lives in `index.html` — no build tools, no dependencies, no server required. Open the file directly in a browser. Hosted via GitHub Pages.
 
 ## Architecture
 
-`value.html` is a self-contained HTML/CSS/JS page structured as:
+`index.html` is a self-contained HTML/CSS/JS page structured as:
 
 - **Data**: A `modules` array (6 learning modules) defined at the top of the `<script>` block. Each module has: id, title, level, keywords, learning items, practice exercises, and output deliverables.
 - **State**: `state` object tracks the active module and completed modules. Persisted to `localStorage` under key `vi_path_progress_v1`.
