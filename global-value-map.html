@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全球价值地图：一张图看清世界分工与投资逻辑</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700;900&family=Noto+Sans+SC:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --ink: #1a1410;
+    --ink-light: #4a3f35;
+    --ink-faint: #8a7a6a;
+    --paper: #f5f0e8;
+    --paper-dark: #ede7d9;
+    --paper-darker: #ddd5c5;
+    --accent: #c0392b;
+    --accent-warm: #e67e22;
+    --accent-cool: #2c5f8a;
+    --gold: #b8860b;
+    --green: #2d6a4f;
+    --serif: 'Noto Serif SC', serif;
+    --sans: 'Noto Sans SC', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    line-height: 1.8;
+    font-size: 17px;
+  }
+
+  /* HEADER */
+  .masthead {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 80px 40px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .masthead::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      rgba(255,255,255,0.015) 40px,
+      rgba(255,255,255,0.015) 41px
+    );
+  }
+
+  .masthead-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-warm);
+    margin-bottom: 24px;
+    border: 1px solid rgba(230,126,34,0.4);
+    padding: 4px 12px;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 900;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+    color: var(--paper);
+  }
+
+  .subtitle {
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 300;
+    color: rgba(245,240,232,0.65);
+    line-height: 1.7;
+    max-width: 580px;
+  }
+
+  .meta {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: rgba(245,240,232,0.4);
+    letter-spacing: 0.08em;
+  }
+
+  /* BODY */
+  .content {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 64px 40px 80px;
+  }
+
+  /* LEAD */
+  .lead {
+    font-size: 20px;
+    line-height: 1.75;
+    color: var(--ink-light);
+    margin-bottom: 56px;
+    padding-bottom: 48px;
+    border-bottom: 2px solid var(--paper-darker);
+  }
+
+  .lead strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  /* SECTION */
+  .section {
+    margin-bottom: 72px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .layer-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    padding-top: 4px;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: clamp(20px, 3vw, 26px);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 36px 0 16px;
+  }
+
+  p {
+    color: var(--ink-light);
+    margin-bottom: 20px;
+    line-height: 1.85;
+  }
+
+  /* COUNTRY TAGS */
+  .countries {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0 24px;
+  }
+
+  .country {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 2px;
+    letter-spacing: 0.06em;
+  }
+
+  .country.primary {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .country.secondary {
+    background: var(--paper-darker);
+    color: var(--ink-light);
+    border: 1px solid var(--paper-darker);
+  }
+
+  /* INSIGHT BOX */
+  .insight {
+    background: var(--paper-dark);
+    border-left: 3px solid var(--accent);
+    padding: 20px 24px;
+    margin: 28px 0;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .insight-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .insight p {
+    color: var(--ink);
+    font-size: 15px;
+    margin: 0;
+    line-height: 1.7;
+  }
+
+  /* INVESTMENT ANGLE */
+  .invest-angle {
+    background: #1a1410;
+    color: var(--paper);
+    padding: 18px 22px;
+    margin: 20px 0;
+    border-radius: 3px;
+  }
+
+  .invest-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--accent-warm);
+    margin-bottom: 8px;
+  }
+
+  .invest-angle p {
+    color: rgba(245,240,232,0.8);
+    font-size: 14px;
+    margin: 0;
+    font-family: var(--sans);
+    font-weight: 300;
+    line-height: 1.7;
+  }
+
+  /* DIVIDER */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--paper-darker);
+    margin: 56px 0;
+  }
+
+  /* BIG QUOTE */
+  .pullquote {
+    font-size: clamp(18px, 2.5vw, 24px);
+    font-weight: 600;
+    line-height: 1.55;
+    color: var(--ink);
+    border-top: 3px solid var(--ink);
+    border-bottom: 1px solid var(--paper-darker);
+    padding: 28px 0 24px;
+    margin: 48px 0;
+  }
+
+  /* PYRAMID VISUAL */
+  .pyramid-wrap {
+    margin: 48px 0;
+    background: var(--paper-dark);
+    border: 1px solid var(--paper-darker);
+    padding: 40px 32px;
+    border-radius: 4px;
+  }
+
+  .pyramid-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 28px;
+    text-align: center;
+  }
+
+  .pyramid-row {
+    display: flex;
+    align-items: stretch;
+    margin-bottom: 6px;
+    gap: 12px;
+  }
+
+  .pyramid-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+    width: 80px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    text-align: right;
+    justify-content: flex-end;
+    letter-spacing: 0.05em;
+    line-height: 1.3;
+  }
+
+  .pyramid-bar {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    border-radius: 2px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--paper);
+    flex: 1;
+    letter-spacing: 0.02em;
+  }
+
+  .bar-1 { background: #8a7a6a; }
+  .bar-2 { background: #6a5a4a; }
+  .bar-3 { background: #4a3f35; }
+  .bar-4 { background: #2c5f8a; }
+  .bar-5 { background: #2d6a4f; }
+  .bar-6 { background: #b8860b; }
+  .bar-7 { background: #c0392b; }
+  .bar-8 { background: #1a1410; }
+
+  .pyramid-margin {
+    font-family: var(--mono);
+    font-size: 11px;
+    width: 60px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    color: var(--ink-faint);
+  }
+
+  /* COMPARISON TABLE */
+  .compare {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 28px 0;
+    font-size: 14px;
+  }
+
+  .compare th {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-bottom: 2px solid var(--ink);
+    padding: 10px 14px;
+    text-align: left;
+  }
+
+  .compare td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--paper-darker);
+    font-family: var(--sans);
+    color: var(--ink-light);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+
+  .compare tr:last-child td {
+    border-bottom: none;
+  }
+
+  .compare .highlight-row td {
+    background: rgba(192,57,43,0.04);
+  }
+
+  /* FOOTER */
+  .footer {
+    background: var(--ink);
+    color: rgba(245,240,232,0.45);
+    padding: 48px 40px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    line-height: 2;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .masthead-inner > * {
+    animation: fadeUp 0.6s ease backwards;
+  }
+  .masthead-inner > *:nth-child(1) { animation-delay: 0.1s; }
+  .masthead-inner > *:nth-child(2) { animation-delay: 0.25s; }
+  .masthead-inner > *:nth-child(3) { animation-delay: 0.4s; }
+  .masthead-inner > *:nth-child(4) { animation-delay: 0.55s; }
+
+  @media (max-width: 600px) {
+    .content { padding: 40px 24px 60px; }
+    .masthead { padding: 56px 24px 48px; }
+    .pyramid-label { display: none; }
+    .pyramid-margin { display: none; }
+    .compare { font-size: 13px; }
+    .compare th, .compare td { padding: 10px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <a href="index.html" style="display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:0.1em;color:rgba(245,240,232,0.5);text-decoration:none;margin-bottom:20px;">← 返回学习路径</a>
+    <div class="tag">全球分工 · 投资视角</div>
+    <h1>全球价值地图<br>一张图看清世界分工与投资逻辑</h1>
+    <p class="subtitle">从富士康到爱马仕，从沙特原油到诺和诺德的专利分子——理解全球分工，是理解企业定价权、护城河、以及长期超额收益的起点。</p>
+    <div class="meta">2024 &nbsp;·&nbsp; 约 4000 字 &nbsp;·&nbsp; 阅读时间 15 分钟</div>
+  </div>
+</header>
+
+<main class="content">
+
+  <p class="lead">
+    一部iPhone，富士康赚<strong>5美元</strong>，苹果赚<strong>200美元</strong>。同一条供应链，同样的劳动，回报相差40倍。<br><br>
+    这不是运气，也不是剥削——而是<strong>全球分工体系的必然结果</strong>。理解这张地图，你会对"什么样的生意值得持有"产生完全不同的判断。
+  </p>
+
+  <!-- ============ PYRAMID ============ -->
+  <div class="pyramid-wrap">
+    <div class="pyramid-title">全球价值分工 · 八层结构</div>
+
+    <div class="pyramid-row">
+      <div class="pyramid-label">低毛利</div>
+      <div class="pyramid-bar bar-1">① 资源 / 原材料</div>
+      <div class="pyramid-margin">5–20%</div>
+    </div>
+    <div class="pyramid-row">
+      <div class="pyramid-label"></div>
+      <div class="pyramid-bar bar-2">② 劳动密集制造</div>
+      <div class="pyramid-margin">3–8%</div>
+    </div>
+    <div class="pyramid-row">
+      <div class="pyramid-label"></div>
+      <div class="pyramid-bar bar-3">③ 精密制造 / 代工</div>
+      <div class="pyramid-margin">8–20%</div>
+    </div>
+    <div class="pyramid-row">
+      <div class="pyramid-label"></div>
+      <div class="pyramid-bar bar-4">④ 高端材料 / 精密零部件</div>
+      <div class="pyramid-margin">20–40%</div>
+    </div>
+    <div class="pyramid-row">
+      <div class="pyramid-label"></div>
+      <div class="pyramid-bar bar-5">⑤ 生物科技 / 制药研发</div>
+      <div class="pyramid-margin">30–70%</div>
+    </div>
+    <div class="pyramid-row">
+      <div class="pyramid-label"></div>
+      <div class="pyramid-bar bar-6">⑥ 软件 / 平台 / 数字基础设施</div>
+      <div class="pyramid-margin">60–80%</div>
+    </div>
+    <div class="pyramid-row">
+      <div class="pyramid-label"></div>
+      <div class="pyramid-bar bar-7">⑦ 品牌 / 文化 / 生活方式</div>
+      <div class="pyramid-margin">50–80%</div>
+    </div>
+    <div class="pyramid-row">
+      <div class="pyramid-label">高毛利</div>
+      <div class="pyramid-bar bar-8">⑧ 金融 / 资本 / 定价权</div>
+      <div class="pyramid-margin">极高</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ============ LAYER 1 ============ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="layer-num">LAYER 01</span>
+      <h2>资源与原材料：地下有什么，卖什么</h2>
+    </div>
+
+    <div class="countries">
+      <span class="country primary">沙特</span>
+      <span class="country primary">俄罗斯</span>
+      <span class="country primary">澳大利亚</span>
+      <span class="country primary">智利</span>
+      <span class="country primary">刚果</span>
+      <span class="country secondary">巴西</span>
+      <span class="country secondary">挪威</span>
+      <span class="country secondary">中国（稀土）</span>
+    </div>
+
+    <p>石油、铁矿石、铜、锂、钴、稀土、粮食——这层国家出售的是地球的禀赋，不是人类的创造。收入高度依赖大宗商品价格周期，定价权在买方手里。</p>
+
+    <p>中国是这一层最特殊的玩家：稀土储量占全球60%以上，但更重要的是中国掌握了<strong>稀土加工冶炼</strong>的能力，把原料优势延伸成了供应链控制权。这是资源国少有的反例。</p>
+
+    <div class="insight">
+      <div class="insight-label">投资启示</div>
+      <p>纯资源企业的估值与大宗商品周期高度相关，ROE难以长期稳定。真正值得关注的是那些把资源优势转化为加工能力的企业——比如从铁矿石到钢铁特种材料，从锂矿到电池级碳酸锂，向上爬一层，护城河就宽一圈。</p>
+    </div>
+  </div>
+
+  <!-- ============ LAYER 2 ============ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="layer-num">LAYER 02</span>
+      <h2>劳动密集制造：工资套利，迟早轮换</h2>
+    </div>
+
+    <div class="countries">
+      <span class="country primary">孟加拉国</span>
+      <span class="country primary">越南</span>
+      <span class="country primary">柬埔寨</span>
+      <span class="country secondary">印尼</span>
+      <span class="country secondary">埃塞俄比亚（尝试中）</span>
+    </div>
+
+    <p>纺织、服装、鞋类、简单组装。这一层的核心优势是廉价劳动力，但这个优势会随工资上涨消失，订单会转移到下一个更便宜的国家。孟加拉国承接了从中国转出的纺织产能，未来可能让位给非洲某国。</p>
+
+    <p>越南是最近20年爬升最快的案例：从纯劳动密集起步，现在三星把手机组装搬到越南，越南的出口结构已经发生质变——但越南的工厂大多数仍是韩国、台湾企业过去建的，本土代工巨头尚未出现。</p>
+
+    <div class="invest-angle">
+      <div class="invest-label">投资视角</div>
+      <p>这一层利润极薄，不适合长期持有。但可以关注从这层向上爬升的企业——当一家孟加拉纺织代工开始做品牌设计，或一家越南组装厂开始掌握核心零部件，那才是值得研究的拐点。</p>
+    </div>
+  </div>
+
+  <!-- ============ LAYER 3 ============ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="layer-num">LAYER 03</span>
+      <h2>精密制造与代工：台湾的护城河为什么难以复制</h2>
+    </div>
+
+    <div class="countries">
+      <span class="country primary">台湾</span>
+      <span class="country primary">中国大陆</span>
+      <span class="country primary">韩国</span>
+      <span class="country secondary">日本</span>
+      <span class="country secondary">德国（汽车）</span>
+    </div>
+
+    <p>这一层的关键词不是"便宜"，而是<strong>做得准、做得快、做得稳</strong>。台积电的晶圆代工，富士康/广达的电子组装，都属于此类。表面看是"帮别人造东西"，实则是技术密集+产业集群缺一不可。</p>
+
+    <p>台湾最厉害的地方在于把整条代工生态链打通：晶圆（台积电/联电）→封测（日月光）→PCB组装（广达/仁宝/和硕）→机构件（鸿准），形成了极难被外部复制的产业集群。苹果花了十几年想把产能移出来，至今没有真正成功。</p>
+
+    <p>中国大陆是目前唯一具备威胁性的挑战者——立讯精密已经拿到苹果iPhone部分组装订单，中芯国际在成熟制程稳步推进。但地缘政治反而在帮台湾锁定欧美客户。</p>
+
+    <div class="insight">
+      <div class="insight-label">投资启示</div>
+      <p>代工企业的护城河不在工厂，在生态位——客户认证、工程人才密度、供应商网络。一旦占据，极难被替代。但毛利天花板明显，真正高回报的时刻往往是技术代差拉大的那几年（比如台积电3nm量产后的窗口期）。</p>
+    </div>
+  </div>
+
+  <!-- ============ LAYER 4 ============ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="layer-num">LAYER 04</span>
+      <h2>高端材料与精密零部件：你看不见我，但没我你转不起来</h2>
+    </div>
+
+    <div class="countries">
+      <span class="country primary">日本</span>
+      <span class="country primary">德国</span>
+      <span class="country primary">荷兰</span>
+      <span class="country secondary">瑞典</span>
+      <span class="country secondary">法国</span>
+      <span class="country secondary">美国（设备）</span>
+    </div>
+
+    <p>这是全球分工中最低调、最难被撼动的一层。日本信越化学的硅晶圆、荷兰ASML的光刻机、日本住友化学的光刻胶、德国巴斯夫的特种化学品、瑞典SKF的精密轴承——这些公司你可能叫不出名字，但全球制造业的运转完全依赖它们。</p>
+
+    <p>2019年日本对韩国的半导体材料出口限制，让三星和SK海力士承压数月，一国的材料卡脖子能让另一国的科技巨头陷入困境。日本东丽的碳纤维，波音777机身的选材，别无替代。</p>
+
+    <div class="pullquote">
+      日本的逻辑是：我不给你代工，但你代工离不开我的材料和设备。这是比代工更深的护城河。
+    </div>
+
+    <div class="invest-angle">
+      <div class="invest-label">投资视角</div>
+      <p>这一层企业的特征是：低调、高毛利、客户粘性极强、行业集中度高。ASML几乎是唯一能生产EUV光刻机的公司，PE高但有充分理由。找到某个细分领域的"材料ASML"，是寻找真正护城河的好方法。</p>
+    </div>
+  </div>
+
+  <!-- ============ LAYER 5 ============ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="layer-num">LAYER 05</span>
+      <h2>生物科技与制药：一个分子式，收全球的钱</h2>
+    </div>
+
+    <div class="countries">
+      <span class="country primary">美国</span>
+      <span class="country primary">瑞士</span>
+      <span class="country primary">丹麦</span>
+      <span class="country primary">英国</span>
+      <span class="country secondary">印度（仿制药）</span>
+      <span class="country secondary">中国（原料药）</span>
+    </div>
+
+    <p>制药的国际分工极为清晰：<strong>研发</strong>集中在美国（波士顿/旧金山biotech生态）、瑞士（诺华、罗氏）、英国（阿斯利康）、丹麦（诺和诺德）；<strong>原料药制造</strong>高度集中在印度和中国；<strong>仿制药</strong>是印度的强项，向全球低收入国家供应廉价药。</p>
+
+    <p>诺和诺德的GLP-1药物（司美格鲁肽）是近年最极端的案例：一家丹麦公司靠一个分子式，让丹麦2023年GDP增速翻倍，市值一度超越全国GDP。一个专利分子的价值，胜过万亩工厂。</p>
+
+    <div class="insight">
+      <div class="insight-label">投资启示</div>
+      <p>生物科技是高风险高回报的双刃剑——成功的专利药ROE惊人，但研发失败率极高。对非专业投资者，与其押注单个靶点，不如关注平台型药企（多管线+技术授权）或受益于GLP-1等大趋势的上下游产业链。</p>
+    </div>
+  </div>
+
+  <!-- ============ LAYER 6 ============ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="layer-num">LAYER 06</span>
+      <h2>软件、平台与数字基础设施：在别人的地基上建房子</h2>
+    </div>
+
+    <div class="countries">
+      <span class="country primary">美国</span>
+      <span class="country primary">中国</span>
+      <span class="country secondary">印度（外包服务）</span>
+      <span class="country secondary">爱尔兰（税务枢纽）</span>
+    </div>
+
+    <p>美国几乎垄断了全球平台层：谷歌、Meta、微软、AWS、Salesforce——这些不只是公司，它们是<strong>全球其他企业运营的基础设施</strong>。其他国家的企业，大多数都在美国平台的生态系统上运行。</p>
+
+    <p>中国是唯一建出独立平台生态的国家——微信、阿里、字节，但基本局限在中文世界。印度选择了另一条路：以塔塔咨询（TCS）、印孚瑟斯为代表，输出<strong>软件外包人力</strong>，本质是另一种代工，只是代工的是代码。</p>
+
+    <div class="invest-angle">
+      <div class="invest-label">投资视角</div>
+      <p>平台经济的核心是网络效应——用户越多、价值越高、竞争对手越难撼动。80%毛利率背后是几乎为零的边际成本。问题是估值往往已经充分反映这个逻辑，真正的超额收益出现在平台扩张新品类的拐点，或者监管打压造成的错误定价时。</p>
+    </div>
+  </div>
+
+  <!-- ============ LAYER 7 ============ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="layer-num">LAYER 07</span>
+      <h2>品牌、文化与生活方式：定义什么是"好"，就能定价</h2>
+    </div>
+
+    <div class="countries">
+      <span class="country primary">法国</span>
+      <span class="country primary">意大利</span>
+      <span class="country primary">美国（内容）</span>
+      <span class="country primary">英国（语言/教育）</span>
+      <span class="country secondary">韩国（K-pop）</span>
+      <span class="country secondary">日本（ACG/游戏）</span>
+    </div>
+
+    <p>这一层出售的不是物品，而是<strong>审美定义权与文化认同</strong>。爱马仕定义什么是"品味"，LVMH定义什么是"奢华"，这种定价权与台积电的技术壁垒在本质上是一样的——都是护城河，只是形态不同。</p>
+
+    <p>美国输出的是好莱坞、Netflix、流行音乐——本质是一套<strong>文化操作系统</strong>，让全球人用美国的叙事框架理解世界，顺带卖掉可口可乐和Nike。韩国近20年的崛起是最值得研究的文化出口案例：BTS、《鱿鱼游戏》、韩食，对韩国旅游和消费品出口的带动效应是真实且可量化的。</p>
+
+    <div class="insight">
+      <div class="insight-label">投资启示</div>
+      <p>品牌护城河的特点是：不怕通胀（可以随意提价）、几乎不需要资本开支、越老越值钱。爱马仕的净利润率长期超过40%，原因很简单——它卖的不是包，是身份符号，没有竞争对手能"替代"这个符号。</p>
+    </div>
+  </div>
+
+  <!-- ============ LAYER 8 ============ -->
+  <div class="section">
+    <div class="section-header">
+      <span class="layer-num">LAYER 08</span>
+      <h2>金融、资本与定价权：控制钱的流向，就控制了一切</h2>
+    </div>
+
+    <div class="countries">
+      <span class="country primary">美国</span>
+      <span class="country primary">英国</span>
+      <span class="country primary">瑞士</span>
+      <span class="country secondary">新加坡</span>
+      <span class="country secondary">香港</span>
+    </div>
+
+    <p>金融是最抽象、也是全球分工中回报最高的一层。华尔街通过美元结算体系和资本市场定价权，决定着全球资产的估值逻辑。一家沙特石油公司的IPO定价，一笔非洲矿产的收购融资，背后的承销、定价、结算链条都流经纽约和伦敦。</p>
+
+    <p>瑞士的财富管理和私人银行，做的是另一个维度：为全球高净值人群提供资产保护和传承服务，核心是几百年积累的中立信誉和法律体系，这是任何新兴市场都无法速成的。</p>
+
+    <div class="invest-angle">
+      <div class="invest-label">投资视角</div>
+      <p>金融行业的护城河来自监管牌照、信誉积累和网络效应（更多资金吸引更好的标的，再吸引更多资金）。美联储的货币政策能让全球资产同步波动——理解这一层的逻辑，是理解宏观投资框架的前提。</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ============ SPECIAL CASES ============ -->
+  <div class="section">
+    <h2>三个值得单独讨论的特殊案例</h2>
+
+    <h3>中国：唯一横跨全部八层的国家</h3>
+    <p>中国是全球分工图中最难被归类的存在——既是资源国（稀土）、劳动密集制造国（历史上）、精密代工国，也在第四层积极追赶（中芯、长电），并在软件（字节、华为）、品牌（比亚迪、大疆、名创优品）层面持续爬升。这种全层覆盖在历史上前所未有，也是美国将其视为系统性挑战的根本原因。</p>
+
+    <h3>日本：选择做"隐形层"的冠军</h3>
+    <p>日本几乎主动退出了品牌消费电子的竞争（索尼是例外），转而专注于第四层——材料、设备、零部件。这是一个很聪明的选择：不跟中韩打价格战，而是成为供应链中无可替代的"隐形基础设施"。日本化学、精密机械企业的利润率和稳定性，长期被市场低估。</p>
+
+    <h3>美国：正在意识到放弃制造业的代价</h3>
+    <p>美国战略性地放弃了第二、三层制造，全押第六、七、八层，这在过去40年是正确的。但芯片法案（CHIPS Act）和IRA的通过，说明美国政策层已经意识到：当供应链过度集中在地缘政治对手手中，纯粹的"设计-外包"模式存在战略脆弱性。重建制造业生态的代价，远比当初放弃它要高。</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ============ INVESTMENT FRAMEWORK ============ -->
+  <div class="section">
+    <h2>给投资人的实用框架：用分工地图筛选标的</h2>
+
+    <p>理解这张地图之后，可以提炼出几个对选股有直接帮助的问题：</p>
+
+    <table class="compare">
+      <thead>
+        <tr>
+          <th>问题</th>
+          <th>背后逻辑</th>
+          <th>高分特征</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>这家公司在价值链的哪一层？</strong></td>
+          <td>层级决定毛利天花板</td>
+          <td>第4-8层，毛利>30%</td>
+        </tr>
+        <tr class="highlight-row">
+          <td><strong>它的护城河是技术、品牌还是网络效应？</strong></td>
+          <td>护城河决定定价权持续性</td>
+          <td>三者之一清晰可见</td>
+        </tr>
+        <tr>
+          <td><strong>它在向上爬还是向下滑？</strong></td>
+          <td>爬升期的估值扩张最值钱</td>
+          <td>产品结构向上迁移</td>
+        </tr>
+        <tr class="highlight-row">
+          <td><strong>地缘政治对它是顺风还是逆风？</strong></td>
+          <td>供应链重组正在重写分工格局</td>
+          <td>受益于"去风险"重组</td>
+        </tr>
+        <tr>
+          <td><strong>它能随通胀提价吗？</strong></td>
+          <td>真正的护城河企业不怕通胀</td>
+          <td>爱马仕/台积电式定价权</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ============ CLOSING ============ -->
+  <div class="section">
+    <div class="pullquote">
+      越无形，越难被替代，越能持续收取溢价——这是全球分工教给我们的最重要的投资原则。
+    </div>
+
+    <p>全球分工的格局，是几十年甚至几百年历史积累的结果。它不会在一夜之间改变，但它正在被两股力量同时重塑：<strong>中国的全层爬升</strong>和<strong>地缘政治驱动的供应链重组</strong>。</p>
+
+    <p>对独立投资者来说，这张地图不是用来记忆的，而是用来<strong>建立直觉</strong>的——当你看到一家公司，能迅速判断它处于哪一层、它的定价权来自哪里、它面临的竞争压力是什么，选股的逻辑就会清晰很多。</p>
+
+    <p style="color: var(--ink-faint); font-size: 15px;">富士康赚5美元，苹果赚200美元。不是因为苹果比富士康更努力，而是因为苹果在这张地图上站在了一个不同的位置。</p>
+  </div>
+
+</main>
+
+<footer class="footer">
+  全球价值地图 &nbsp;·&nbsp; 独立投资人参考框架<br>
+  转载请注明出处 &nbsp;·&nbsp; 本文不构成投资建议
+</footer>
+
+</body>
+</html>
