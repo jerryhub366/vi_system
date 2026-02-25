@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>投资等待清单</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0a0e1a; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0a0e1a; }
+    ::-webkit-scrollbar-thumb { background: #1e2940; border-radius: 3px; }
+    input, textarea, select { outline: none !important; }
+    .trigger-item::before { content: "→"; color: #f59e0b; margin-right: 8px; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+    .card-anim { animation: fadeIn 0.25s ease; }
+    .hover-card:hover { border-color: #2a3f6f !important; background: #0f1829 !important; }
+    input, textarea, select { font-family: 'Georgia', 'Times New Roman', serif; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const STORAGE_KEY = "investment-waiting-list";
+
+    const INITIAL_DATA = [
+      {
+        id: "1",
+        name: "招商轮船",
+        ticker: "601872.SH",
+        type: "周期底部",
+        category: "航运",
+        thesis: "央企VLCC龙头，资产背书强，公司不会消失。周期底部时上行弹性大，下行有资产价值兜底，类可转债结构。",
+        triggers: [
+          "VLCC即期日租金 < $20,000/天（波罗的海BDTI指标）",
+          "P/B < 0.7x",
+          "新船订单低迷，未来2年交付量偏少"
+        ],
+        watchMetrics: "VLCC日租金、P/B、债务/EBITDA",
+        maxLoss: "20-25%",
+        holdingPeriod: "2-4年",
+        status: "watching",
+        note: "需同时关注「国轮国运」政策进展，若落地是重要催化剂。当前估值中性偏低，尚未到理想买点。",
+        addedDate: "2025-02-25"
+      },
+      {
+        id: "2",
+        name: "中远海能",
+        ticker: "600026.SH",
+        type: "周期底部",
+        category: "航运",
+        thesis: "与招商轮船高度同逻辑的央企油运龙头，同为VLCC主力玩家。规模相近，估值可对比参考，择优选择或同时持有。",
+        triggers: [
+          "VLCC即期日租金 < $20,000/天",
+          "P/B < 0.7x",
+          "与601872横向比较，哪家估值折价更深"
+        ],
+        watchMetrics: "VLCC日租金、P/B、与招商轮船的相对估值差",
+        maxLoss: "20-25%",
+        holdingPeriod: "2-4年",
+        status: "watching",
+        note: "与招商轮船同步跟踪，二选一或比较后择优。注意两者在LNG业务布局上的差异。",
+        addedDate: "2025-02-25"
+      },
+      {
+        id: "3",
+        name: "Frontline",
+        ticker: "FRO.NYSE",
+        type: "周期底部",
+        category: "航运",
+        thesis: "全球最大独立VLCC运营商，欧洲上市，财务杠杆更激进。牛市弹性比国内油运股更大，但历史上有重组记录，下行保护弱于央企。",
+        triggers: [
+          "VLCC日租金 < $15,000/天",
+          "股价接近历史低点",
+          "公司债务结构可持续（利息覆盖倍数 > 1.5x）"
+        ],
+        watchMetrics: "VLCC日租金、利息覆盖倍数、负债/EBITDA",
+        maxLoss: "30%（风险更高，仓位应小于国内油运股）",
+        holdingPeriod: "1-3年",
+        status: "watching",
+        note: "高弹性高风险，作为组合补充而非核心仓位。需在买入前确认公司债务结构健康。",
+        addedDate: "2025-02-25"
+      },
+      {
+        id: "4",
+        name: "煤炭龙头（中国神华/兖矿）",
+        ticker: "601088.SH / 1171.HK",
+        type: "周期底部",
+        category: "能源",
+        thesis: "与航运逻辑高度相似：重资产国企、行业不消失、周期压制定价。煤炭需求短期受能源转型压制，但10年内不会消失。底部时分红率极高，是不对称性的额外保护。",
+        triggers: [
+          "秦皇岛动力煤价格 < 600元/吨",
+          "P/B < 1.0x，股息率 > 6%",
+          "神华/兖矿PE < 8x"
+        ],
+        watchMetrics: "动力煤现货价、股息率、P/B",
+        maxLoss: "15-20%（高分红提供缓冲）",
+        holdingPeriod: "2-5年",
+        status: "watching",
+        note: "煤炭的风险是能源转型提速，但替代是渐进的。底部时高分红是重要的心理锚，帮助持有。",
+        addedDate: "2025-02-25"
+      },
+      {
+        id: "5",
+        name: "中海油（中国海洋石油）",
+        ticker: "600938.SH / 0883.HK",
+        type: "周期底部",
+        category: "能源",
+        thesis: "纯上游油气开采，盈利与油价强相关。成本管控在全球独立油气公司中属优秀，低油价下仍能盈利。H股折价明显，港股更有吸引力。",
+        triggers: [
+          "Brent原油 < $60/桶",
+          "H股P/E < 6x，P/B < 0.8x",
+          "股息率（H股）> 7%"
+        ],
+        watchMetrics: "Brent原油价格、H股估值、股息率",
+        maxLoss: "20%",
+        holdingPeriod: "2-4年",
+        status: "watching",
+        note: "油价难预测，但$60以下对中海油是严重低估区间。H股比A股性价比更高，关注AH溢价。",
+        addedDate: "2025-02-25"
+      },
+      {
+        id: "6",
+        name: "A股可转债（类别机会）",
+        ticker: "—",
+        type: "结构性不对称",
+        category: "可转债",
+        thesis: "工具本身设计了不对称性：债券保底+股票弹性。选择逻辑：资质够用（不违约）+ 正股被压制 + 转债价格接近面值（100-105元）。不需要判断行业周期，只需判断公司不死。",
+        triggers: [
+          "某只转债价格跌至100-103元附近",
+          "发行公司非ST、现金流为正、负债率可控",
+          "距到期日 > 2年（给予足够弹性时间）"
+        ],
+        watchMetrics: "转债价格、YTM、转股溢价率、正股估值",
+        maxLoss: "5-8%（接近面值买入，下行空间极有限）",
+        holdingPeriod: "0.5-3年",
+        status: "learning",
+        note: "这个方向需要先系统学习定价逻辑（集思录等社区有成熟方法论）。当前状态：了解逻辑，尚未掌握选择方法，暂不操作。",
+        addedDate: "2025-02-25"
+      },
+      {
+        id: "7",
+        name: "优质公司阶段性错杀（待定）",
+        ticker: "—",
+        type: "质量错杀",
+        category: "通用",
+        thesis: "具备清晰护城河（定价权/网络效应/高转换成本）的优质公司，因短期负面因素被市场过度惩罚。下行有内在价值支撑，上行靠价值回归+继续复利。这是能力要求最高但质量最好的机会。",
+        triggers: [
+          "具体公司待填入（需先通过买方研究确认护城河真实存在）",
+          "短期困难可识别为非永久性损伤",
+          "估值低于合理内在价值30%以上"
+        ],
+        watchMetrics: "视具体公司而定",
+        maxLoss: "20-30%",
+        holdingPeriod: "3-7年",
+        status: "building",
+        note: "这是清单里需要持续填充的核心区域。每完成一份买方报告，评估是否符合条件后加入。当前暂无具体标的。",
+        addedDate: "2025-02-25"
+      }
+    ];
+
+    const STATUS_CONFIG = {
+      watching:  { label: "观察中",  color: "#f59e0b", bg: "rgba(245,158,11,0.12)" },
+      ready:     { label: "可行动",  color: "#10b981", bg: "rgba(16,185,129,0.12)" },
+      active:    { label: "已持有",  color: "#3b82f6", bg: "rgba(59,130,246,0.12)" },
+      passed:    { label: "已过期",  color: "#6b7280", bg: "rgba(107,114,128,0.12)" },
+      learning:  { label: "学习中",  color: "#a78bfa", bg: "rgba(167,139,250,0.12)" },
+      building:  { label: "待填充",  color: "#94a3b8", bg: "rgba(148,163,184,0.12)" },
+    };
+
+    const TYPE_COLORS = {
+      "周期底部":    "#f59e0b",
+      "结构性不对称": "#a78bfa",
+      "质量错杀":    "#10b981",
+      "净资产折价":  "#60a5fa",
+      "事件驱动":    "#f472b6",
+    };
+
+    const EMPTY_FORM = {
+      name: "", ticker: "", type: "周期底部", category: "",
+      thesis: "", triggers: ["", "", ""], watchMetrics: "",
+      maxLoss: "", holdingPeriod: "", status: "watching", note: ""
+    };
+
+    const inputStyle = {
+      width: "100%", background: "#0d1525", border: "1px solid #1e2940", borderRadius: 6,
+      color: "#cbd5e1", padding: "9px 12px", fontSize: 13, fontFamily: "'Georgia', serif", display: "block"
+    };
+
+    function Section({ title, children }) {
+      return (
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 10, letterSpacing: 2, color: "#475569", fontFamily: "monospace", textTransform: "uppercase", marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 20, height: 1, background: "#1e2940" }}></div>
+            {title}
+            <div style={{ flex: 1, height: 1, background: "#1e2940" }}></div>
+          </div>
+          {children}
+        </div>
+      );
+    }
+
+    function MetricBox({ label, value, accent }) {
+      return (
+        <div style={{ background: "#0d1525", border: "1px solid #1a2540", borderRadius: 8, padding: "14px 16px" }}>
+          <div style={{ fontSize: 10, color: "#475569", letterSpacing: 1, fontFamily: "monospace", marginBottom: 6 }}>{label.toUpperCase()}</div>
+          <div style={{ fontSize: 13, color: accent ? "#ef4444" : "#94a3b8", lineHeight: 1.5 }}>{value || "—"}</div>
+        </div>
+      );
+    }
+
+    function Field({ label, children, style }) {
+      return (
+        <div style={style}>
+          <div style={{ fontSize: 11, color: "#475569", letterSpacing: 1, fontFamily: "monospace", marginBottom: 6 }}>{label.toUpperCase()}</div>
+          {children}
+        </div>
+      );
+    }
+
+    function WaitingList() {
+      const [items, setItems] = useState(null);
+      const [view, setView] = useState("list");
+      const [selected, setSelected] = useState(null);
+      const [form, setForm] = useState(EMPTY_FORM);
+      const [filter, setFilter] = useState("all");
+      const [saving, setSaving] = useState(false);
+
+      useEffect(() => {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          setItems(stored ? JSON.parse(stored) : INITIAL_DATA);
+          if (!stored) localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_DATA));
+        } catch {
+          setItems(INITIAL_DATA);
+        }
+      }, []);
+
+      const persist = (newItems) => {
+        setItems(newItems);
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(newItems)); } catch {}
+      };
+
+      const filteredItems = items ? items.filter(i => filter === "all" || i.status === filter) : [];
+
+      const openDetail = (item) => { setSelected(item); setView("detail"); };
+      const openEdit = (item) => {
+        setForm({ ...item, triggers: item.triggers.length >= 3 ? item.triggers : [...item.triggers, "", ""].slice(0, 3) });
+        setSelected(item);
+        setView("edit");
+      };
+      const openAdd = () => { setForm(EMPTY_FORM); setView("add"); };
+
+      const saveForm = () => {
+        setSaving(true);
+        const triggers = form.triggers.filter(t => t.trim());
+        const entry = { ...form, triggers, addedDate: form.addedDate || new Date().toISOString().slice(0, 10) };
+        let newItems;
+        if (view === "add") {
+          entry.id = Date.now().toString();
+          newItems = [...items, entry];
+        } else {
+          newItems = items.map(i => i.id === entry.id ? entry : i);
+        }
+        persist(newItems);
+        setSaving(false);
+        setSelected(entry);
+        setView("detail");
+      };
+
+      const deleteItem = (id) => {
+        if (!confirm("确认删除这条记录？")) return;
+        persist(items.filter(i => i.id !== id));
+        setView("list");
+      };
+
+      const updateStatus = (id, status) => {
+        const newItems = items.map(i => i.id === id ? { ...i, status } : i);
+        persist(newItems);
+        setSelected(newItems.find(i => i.id === id));
+      };
+
+      if (!items) return (
+        <div style={{ background: "#0a0e1a", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ color: "#f59e0b", fontFamily: "monospace", fontSize: 14, letterSpacing: 2 }}>LOADING...</div>
+        </div>
+      );
+
+      return (
+        <div style={{ background: "#0a0e1a", minHeight: "100vh", fontFamily: "'Georgia', 'Times New Roman', serif", color: "#e2e8f0" }}>
+          {/* Header */}
+          <div style={{ borderBottom: "1px solid #1a2540", padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: "#0a0e1a", zIndex: 100 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              {view !== "list" && (
+                <button onClick={() => setView("list")} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", fontSize: 20, padding: 0, lineHeight: 1 }}>←</button>
+              )}
+              <div>
+                <div style={{ fontSize: 11, letterSpacing: 3, color: "#64748b", fontFamily: "monospace", textTransform: "uppercase" }}>Investment</div>
+                <div style={{ fontSize: 18, fontWeight: "bold", color: "#f1f5f9", letterSpacing: 0.5, marginTop: 1 }}>等待清单</div>
+              </div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ fontSize: 11, fontFamily: "monospace", color: "#475569" }}>{items.length} entries</div>
+              {view === "list" && (
+                <button onClick={openAdd} style={{ background: "#f59e0b", color: "#0a0e1a", border: "none", borderRadius: 4, padding: "7px 14px", fontSize: 12, fontWeight: "bold", cursor: "pointer", letterSpacing: 1 }}>+ 添加</button>
+              )}
+            </div>
+          </div>
+
+          {/* List View */}
+          {view === "list" && (
+            <div style={{ padding: "20px 24px" }}>
+              <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+                {[["all","全部"],["watching","观察中"],["ready","可行动"],["active","已持有"],["learning","学习中"],["building","待填充"],["passed","已过期"]].map(([k,l]) => (
+                  <button key={k} onClick={() => setFilter(k)} style={{
+                    background: filter === k ? "#f59e0b" : "transparent",
+                    color: filter === k ? "#0a0e1a" : "#64748b",
+                    border: `1px solid ${filter === k ? "#f59e0b" : "#1e2940"}`,
+                    borderRadius: 20, padding: "4px 12px", fontSize: 11, fontFamily: "monospace", letterSpacing: 1, cursor: "pointer"
+                  }}>{l} {k !== "all" ? `(${items.filter(i=>i.status===k).length})` : `(${items.length})`}</button>
+                ))}
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px,1fr))", gap: 10, marginBottom: 24 }}>
+                {[
+                  { label: "观察中", value: items.filter(i=>i.status==="watching").length, color: "#f59e0b" },
+                  { label: "可行动", value: items.filter(i=>i.status==="ready").length, color: "#10b981" },
+                  { label: "已持有", value: items.filter(i=>i.status==="active").length, color: "#3b82f6" },
+                  { label: "学习中", value: items.filter(i=>i.status==="learning").length, color: "#a78bfa" },
+                ].map(s => (
+                  <div key={s.label} style={{ background: "#0d1525", border: "1px solid #1a2540", borderRadius: 8, padding: "12px 16px" }}>
+                    <div style={{ fontSize: 22, fontWeight: "bold", color: s.color, fontFamily: "monospace" }}>{s.value}</div>
+                    <div style={{ fontSize: 11, color: "#475569", letterSpacing: 1, marginTop: 2 }}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {filteredItems.map(item => {
+                  const sc = STATUS_CONFIG[item.status] || STATUS_CONFIG.watching;
+                  const tc = TYPE_COLORS[item.type] || "#94a3b8";
+                  return (
+                    <div key={item.id} className="hover-card card-anim" onClick={() => openDetail(item)} style={{
+                      background: "#0d1525", border: "1px solid #1a2540", borderRadius: 8,
+                      padding: "16px 20px", cursor: "pointer", transition: "all 0.15s"
+                    }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                            <span style={{ fontSize: 16, fontWeight: "bold", color: "#f1f5f9" }}>{item.name}</span>
+                            <span style={{ fontFamily: "monospace", fontSize: 11, color: "#475569", letterSpacing: 1 }}>{item.ticker}</span>
+                            <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 10, border: `1px solid ${tc}40`, color: tc, letterSpacing: 1 }}>{item.type}</span>
+                            <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 10, background: sc.bg, color: sc.color, letterSpacing: 1 }}>{sc.label}</span>
+                          </div>
+                          <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 8, lineHeight: 1.6, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.thesis}</div>
+                        </div>
+                        <div style={{ textAlign: "right", flexShrink: 0 }}>
+                          <div style={{ fontSize: 11, color: "#475569", fontFamily: "monospace" }}>{item.category}</div>
+                          <div style={{ fontSize: 11, color: "#475569", marginTop: 4, fontFamily: "monospace" }}>{item.addedDate}</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                {filteredItems.length === 0 && (
+                  <div style={{ textAlign: "center", color: "#475569", padding: "60px 0", fontSize: 14 }}>暂无符合条件的记录</div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Detail View */}
+          {view === "detail" && selected && (() => {
+            const sc = STATUS_CONFIG[selected.status] || STATUS_CONFIG.watching;
+            const tc = TYPE_COLORS[selected.type] || "#94a3b8";
+            return (
+              <div style={{ padding: "24px", maxWidth: 780, margin: "0 auto" }} className="card-anim">
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 6 }}>
+                    <h1 style={{ margin: 0, fontSize: 26, color: "#f1f5f9", fontWeight: "bold" }}>{selected.name}</h1>
+                    <span style={{ fontFamily: "monospace", fontSize: 13, color: "#64748b" }}>{selected.ticker}</span>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 10, border: `1px solid ${tc}50`, color: tc }}>{selected.type}</span>
+                    <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 10, background: sc.bg, color: sc.color }}>{sc.label}</span>
+                    <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 10, border: "1px solid #1e2940", color: "#64748b" }}>{selected.category}</span>
+                  </div>
+                </div>
+
+                <Section title="生意逻辑 / 不对称性来源">
+                  <p style={{ margin: 0, lineHeight: 1.8, color: "#cbd5e1", fontSize: 14 }}>{selected.thesis}</p>
+                </Section>
+
+                <Section title="触发买入条件">
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {selected.triggers.map((t,i) => (
+                      <div key={i} className="trigger-item" style={{ fontFamily: "monospace", fontSize: 13, color: "#94a3b8", lineHeight: 1.6 }}>{t}</div>
+                    ))}
+                  </div>
+                </Section>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
+                  <MetricBox label="持续跟踪指标" value={selected.watchMetrics} />
+                  <MetricBox label="最大可接受亏损" value={selected.maxLoss} accent />
+                  <MetricBox label="预期持有时长" value={selected.holdingPeriod} />
+                </div>
+
+                {selected.note && (
+                  <Section title="备注 / 当前判断">
+                    <p style={{ margin: 0, lineHeight: 1.8, color: "#94a3b8", fontSize: 13 }}>{selected.note}</p>
+                  </Section>
+                )}
+
+                <Section title="更新状态">
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {Object.entries(STATUS_CONFIG).map(([k, v]) => (
+                      <button key={k} onClick={() => updateStatus(selected.id, k)} style={{
+                        background: selected.status === k ? v.bg : "transparent",
+                        color: selected.status === k ? v.color : "#475569",
+                        border: `1px solid ${selected.status === k ? v.color : "#1e2940"}`,
+                        borderRadius: 20, padding: "5px 12px", fontSize: 11, fontFamily: "monospace", cursor: "pointer", letterSpacing: 1
+                      }}>{v.label}</button>
+                    ))}
+                  </div>
+                </Section>
+
+                <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+                  <button onClick={() => openEdit(selected)} style={{ background: "#1e2940", color: "#cbd5e1", border: "1px solid #2a3f6f", borderRadius: 6, padding: "9px 20px", fontSize: 12, cursor: "pointer" }}>编辑</button>
+                  <button onClick={() => deleteItem(selected.id)} style={{ background: "transparent", color: "#ef444460", border: "1px solid #ef444420", borderRadius: 6, padding: "9px 20px", fontSize: 12, cursor: "pointer" }}>删除</button>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Add / Edit Form */}
+          {(view === "add" || view === "edit") && (
+            <div style={{ padding: "24px", maxWidth: 680, margin: "0 auto" }} className="card-anim">
+              <h2 style={{ color: "#f1f5f9", fontSize: 18, marginTop: 0, marginBottom: 24 }}>{view === "add" ? "添加新机会" : "编辑"}</h2>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+                <Field label="公司名称">
+                  <input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} style={inputStyle} placeholder="招商轮船" />
+                </Field>
+                <Field label="股票代码">
+                  <input value={form.ticker} onChange={e=>setForm({...form,ticker:e.target.value})} style={inputStyle} placeholder="601872.SH" />
+                </Field>
+                <Field label="机会类型">
+                  <select value={form.type} onChange={e=>setForm({...form,type:e.target.value})} style={inputStyle}>
+                    {["周期底部","结构性不对称","质量错杀","净资产折价","事件驱动","其他"].map(t=><option key={t}>{t}</option>)}
+                  </select>
+                </Field>
+                <Field label="行业/类别">
+                  <input value={form.category} onChange={e=>setForm({...form,category:e.target.value})} style={inputStyle} placeholder="航运" />
+                </Field>
+              </div>
+
+              <Field label="生意逻辑 / 不对称性来源" style={{ marginBottom: 14 }}>
+                <textarea value={form.thesis} onChange={e=>setForm({...form,thesis:e.target.value})} rows={3} style={{ ...inputStyle, resize: "vertical" }} placeholder="这门生意为什么在底部有不对称性？下行保护来自哪里，上行弹性来自哪里？" />
+              </Field>
+
+              <Field label="触发买入条件（最多3条）" style={{ marginBottom: 14 }}>
+                {[0,1,2].map(i=>(
+                  <input key={i} value={form.triggers[i]||""} onChange={e=>{const t=[...form.triggers];t[i]=e.target.value;setForm({...form,triggers:t})}}
+                    style={{ ...inputStyle, marginBottom: i<2 ? 8 : 0 }} placeholder={`条件 ${i+1}：具体可量化的指标或事件`} />
+                ))}
+              </Field>
+
+              <Field label="持续跟踪指标" style={{ marginBottom: 14 }}>
+                <input value={form.watchMetrics} onChange={e=>setForm({...form,watchMetrics:e.target.value})} style={inputStyle} placeholder="VLCC日租金、P/B、股息率..." />
+              </Field>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+                <Field label="最大可接受亏损">
+                  <input value={form.maxLoss} onChange={e=>setForm({...form,maxLoss:e.target.value})} style={inputStyle} placeholder="20-25%" />
+                </Field>
+                <Field label="预期持有时长">
+                  <input value={form.holdingPeriod} onChange={e=>setForm({...form,holdingPeriod:e.target.value})} style={inputStyle} placeholder="2-4年" />
+                </Field>
+              </div>
+
+              <Field label="状态" style={{ marginBottom: 14 }}>
+                <select value={form.status} onChange={e=>setForm({...form,status:e.target.value})} style={inputStyle}>
+                  {Object.entries(STATUS_CONFIG).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}
+                </select>
+              </Field>
+
+              <Field label="备注 / 当前判断" style={{ marginBottom: 24 }}>
+                <textarea value={form.note} onChange={e=>setForm({...form,note:e.target.value})} rows={3} style={{ ...inputStyle, resize: "vertical" }} placeholder="当前市场状态、已知风险、催化剂..." />
+              </Field>
+
+              <div style={{ display: "flex", gap: 10 }}>
+                <button onClick={saveForm} disabled={saving || !form.name.trim()} style={{ background: saving ? "#64748b" : "#f59e0b", color: "#0a0e1a", border: "none", borderRadius: 6, padding: "10px 24px", fontSize: 13, fontWeight: "bold", cursor: saving ? "not-allowed" : "pointer" }}>
+                  {saving ? "保存中..." : "保存"}
+                </button>
+                <button onClick={() => setView(selected ? "detail" : "list")} style={{ background: "transparent", color: "#64748b", border: "1px solid #1e2940", borderRadius: 6, padding: "10px 20px", fontSize: 13, cursor: "pointer" }}>取消</button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<WaitingList />);
+  </script>
+</body>
+</html>
